@@ -4,9 +4,10 @@ locals {
   private_subnet_id  = split(",", data.aws_ssm_parameter.private_subnet_ids.value)[0]
   private_subnet_ids = split(",", data.aws_ssm_parameter.private_subnet_ids.value)
 
+  backend_alb_listener_arn = data.aws_ssm_parameter.backend_alb_listener_arn.value
+  frontend_alb_listener_arn = data.aws_ssm_parameter.frontend_alb_listener_arn.value
+
   vpc_id = data.aws_ssm_parameter.vpc_id.value
-
-
 
   common_tags = {
     Project     = var.project_name
@@ -15,9 +16,10 @@ locals {
   }
 
   tg_port           = "${var.component}" == "frontend" ? 80 : 8080
+  
   health_check_path = "${var.component}" == "forntend" ? "/" : "/health"
 
-  alb_listener_arn = "${var.component}" == "frontend" ? data.aws_ssm_parameter.frontend_alb_listener_arn.value : data.aws_ssm_parameter.backend_alb_listener_arn.value
+  alb_listener_arn = "${var.component}" == "frontend" ? frontend_alb_listener_arn : backend_alb_listener_arn
 
   rule_header_url= "${var.component}" == "frontend" ? "${var.environment}.${var.zone_name}" : "${var.component}.backend-${var.environment}.${var.zone_name}"
 }

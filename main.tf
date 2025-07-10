@@ -13,7 +13,7 @@ resource "aws_lb_target_group" "main" {
     interval            = 5
     matcher             = "200-299"
     path                = local.health_check_path
-    port                = 8080
+    port                = local.tg_port
     timeout             = 2
     unhealthy_threshold = 3
   }
@@ -24,6 +24,8 @@ resource "aws_instance" "main" {
   instance_type          = "t2.micro"
   vpc_security_group_ids = [local.sg_id]
   subnet_id              = local.private_subnet_id
+
+  #iam_instance_profile = "EC2RoleToFetchSSMParams"
 
   tags = merge(
     local.common_tags,
@@ -201,7 +203,7 @@ resource "aws_lb_listener_rule" "main" {
 
   condition {
     host_header {
-      values = ["${var.component}.backend-${var.environment}.${var.zone_name}"]
+      values = [local.rule_header_url]
     }
   }
 }
